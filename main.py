@@ -97,14 +97,14 @@ if __name__ == '__main__':
     #backup_filename = "C:\\Users\\user\\Desktop\\Новая папка (4)\\2.rsc"
     # отпарсировать экспортирвоанные команды микротик в словарь (ключ=порядковый номер, значение=сама многострочная команда)
     parsed_commands = backup_to_dict(backup_filename)
-    # фильтруем команды в словаре и оставляем только добавление cкриптов
+    # фильтруем команды в словаре и ОСТАВЛЯЕМ (3-1 параметр = true, иначе- удаляем))только добавление cкриптов
     filtered_commands=filter_dict_keys(parsed_commands, [r"^/system script add"],True)
     # преобразауем ключи с порядкоового номера в имена срикптов
     named_dict=key_id_to_name(filtered_commands)
-    # выводим список ключей , который будут записаны в файлы
+    # выводим список ключей , которые будут записаны в файлы
     for name, command_body in named_dict.items():
         print(f'Command: {name}')
         #print(f'Body:\n{command_body}')
-    # записывапем словарь в файлы
+    # записывапем словарь в файлы.  третий параметр  - это макс размер одного файла (0=безлимит)
     write_dict_to_files(named_dict, backup_filename, 0)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
