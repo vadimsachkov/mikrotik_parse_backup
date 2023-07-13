@@ -99,6 +99,7 @@ if __name__ == '__main__':
     parsed_commands = backup_to_dict(backup_filename)
     # фильтруем команды в словаре и ОСТАВЛЯЕМ (3-1 параметр = true, иначе- удаляем))только добавление cкриптов
     filtered_commands=filter_dict_keys(parsed_commands, [r"^/system script add"],True)
+    filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
     # преобразауем ключи с порядкоового номера в имена срикптов
     named_dict=key_id_to_name(filtered_commands)
     # выводим список ключей , которые будут записаны в файлы
