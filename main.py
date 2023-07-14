@@ -62,7 +62,7 @@ def write_dict_to_files(data_dict, filename, size):
         file.close()
     except IOError as e:
         print(f"Ошибка при открытии или записи файла: {e}")
-
+# записывет каждый скрипт в отдельный именованный файл
 def write_dict_to_files_byfunction(data_dict, file_path):
     try:
         file_number = 1
@@ -75,15 +75,13 @@ def write_dict_to_files_byfunction(data_dict, file_path):
         # Записываем значения словаря в файл
         for key, value in data_dict.items():
             line = f"{value}"
-            current_file = f"{directory}{file_number}__{key}{file_ext}"
+            current_file = f"{directory}/m_{file_number}__{key}{file_ext}"
             file = open(current_file, "w")
             file.write(line)
             file.close()
             file_number += 1
-   except IOError as e:
+    except IOError as e:
         print(f"Ошибка при открытии или записи файла: {e}")
-
-
 
 # фильтрует словарь команд (ключ это порядковый номер, а занчение тело команды)
 # если isneed == True, то в словаре ОСТАЮТСЯ только команды, которые сооветствуют хоть одному шаблону из списка list_reg
@@ -113,21 +111,25 @@ def key_id_to_name(dict_data):
         sorted_dict[key]=value
     return sorted_dict
 
+
 if __name__ == '__main__':
     backup_filename=fd.askopenfilename(title="Выберите backup, экспортируемый из микротик")
+    if backup_filename=="": exit(0)
     #backup_filename = "C:\\Users\\user\\Desktop\\Новая папка (4)\\2.rsc"
     # отпарсировать экспортирвоанные команды микротик в словарь (ключ=порядковый номер, значение=сама многострочная команда)
     parsed_commands = backup_to_dict(backup_filename)
-    # фильтруем команды в словаре и ОСТАВЛЯЕМ (3-1 параметр = true, иначе- удаляем))только добавление cкриптов
-    filtered_commands=filter_dict_keys(parsed_commands, [r"^/system script add"],True)
-    filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
+    # фильтруем команды в словаре и оставляем только добавление cкриптов
+    filtered_commands = filter_dict_keys(parsed_commands, [r"^/system script add"],True)
+    # временно фильттрую функции GlobalFunction . так как они одинаковые
+    #filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
     # преобразауем ключи с порядкоового номера в имена срикптов
     named_dict=key_id_to_name(filtered_commands)
-    # выводим список ключей , которые будут записаны в файлы
+    # выводим список ключей , который будут записаны в файлы
     for name, command_body in named_dict.items():
         print(f'Command: {name}')
         #print(f'Body:\n{command_body}')
-    # записывапем словарь в файлы.  третий параметр  - это макс размер одного файла (0=безлимит)
+    # записывапем словарь в файлы, ограничивая размер (третий параметр)
     write_dict_to_files(named_dict, backup_filename, 0)
-    write_dict_to_files_byfunction(named_dict, backup_filename)
+    # записывет каждый скрипт в отдельный именованный файл
+    #write_dict_to_files_byfunction(named_dict, backup_filename)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
