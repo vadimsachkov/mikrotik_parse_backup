@@ -63,6 +63,28 @@ def write_dict_to_files(data_dict, filename, size):
     except IOError as e:
         print(f"Ошибка при открытии или записи файла: {e}")
 
+def write_dict_to_files_byfunction(data_dict, file_path):
+    try:
+        file_number = 1
+
+        # Разделение пути файла
+        directory = os.path.dirname(file_path)
+        # Разделение имени файла и расширения
+        basename = os.path.basename(file_path)
+        file_name, file_ext = os.path.splitext(basename)
+        # Записываем значения словаря в файл
+        for key, value in data_dict.items():
+            line = f"{value}"
+            current_file = f"{directory}{file_number}__{key}{file_ext}"
+            file = open(current_file, "w")
+            file.write(line)
+            file.close()
+            file_number += 1
+   except IOError as e:
+        print(f"Ошибка при открытии или записи файла: {e}")
+
+
+
 # фильтрует словарь команд (ключ это порядковый номер, а занчение тело команды)
 # если isneed == True, то в словаре ОСТАЮТСЯ только команды, которые сооветствуют хоть одному шаблону из списка list_reg
 # если isneed == False, то в словаре УДАЛЯЮТСЯ  команды, которые сооветствуют хоть одному шаблону из списка list_reg
@@ -91,7 +113,6 @@ def key_id_to_name(dict_data):
         sorted_dict[key]=value
     return sorted_dict
 
-
 if __name__ == '__main__':
     backup_filename=fd.askopenfilename(title="Выберите backup, экспортируемый из микротик")
     #backup_filename = "C:\\Users\\user\\Desktop\\Новая папка (4)\\2.rsc"
@@ -108,4 +129,5 @@ if __name__ == '__main__':
         #print(f'Body:\n{command_body}')
     # записывапем словарь в файлы.  третий параметр  - это макс размер одного файла (0=безлимит)
     write_dict_to_files(named_dict, backup_filename, 0)
+    write_dict_to_files_byfunction(named_dict, backup_filename)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
