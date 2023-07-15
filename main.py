@@ -87,7 +87,7 @@ def write_dict_to_files_byfunction(data_dict, file_path,fileprefix):
 # фильтрует словарь команд (ключ это порядковый номер, а занчение тело команды)
 # если isneed == True, то в словаре ОСТАЮТСЯ только команды, которые сооветствуют хоть одному шаблону из списка list_reg
 # если isneed == False, то в словаре УДАЛЯЮТСЯ  команды, которые сооветствуют хоть одному шаблону из списка list_reg
-def filter_dict_keys(dict_data, list_reg, isneed):
+def filter_match_dict_keys(dict_data, list_reg, isneed):
 
     filtered_dict = {}
     for key,value in dict_data.items():
@@ -95,6 +95,19 @@ def filter_dict_keys(dict_data, list_reg, isneed):
         if (bool(isneed) == bool(isfound)) :
             filtered_dict[key] = dict_data[key]
     return filtered_dict
+
+# фильтрует словарь команд (ключ это порядковый номер, а занчение тело команды)
+# если isneed == True, то в словаре ОСТАЮТСЯ только команды, в которых найден хоть один шаблон из списка list_reg
+# если isneed == False, то в словаре УДАЛЯЮТСЯ  команды, в которых найден хоть один шаблон из списка list_reg
+def filter_search_dict_keys(dict_data, list_reg, isneed):
+
+    filtered_dict = {}
+    for key,value in dict_data.items():
+        isfound=any(re.search(pattern, value) for pattern in list_reg)
+        if (bool(isneed) == bool(isfound)) :
+            filtered_dict[key] = dict_data[key]
+    return filtered_dict
+
 
 # возвращает словарь гдн ключи (порядковый номер команды)заменены на имена скриптов из поля name=
 # должна применяться только для команд добавления скриптов
@@ -120,9 +133,9 @@ if __name__ == '__main__':
     # отпарсировать экспортирвоанные команды микротик в словарь (ключ=порядковый номер, значение=сама многострочная команда)
     parsed_commands = backup_to_dict(backup_filename)
     # фильтруем команды в словаре и оставляем только добавление cкриптов
-    filtered_commands = filter_dict_keys(parsed_commands, [r"^/system script add"],True)
+    filtered_commands = filter_match_dict_keys(parsed_commands, [r"^/system script add"], True)
     # временно фильттрую функции GlobalFunction . так как они одинаковые
-    filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
+    filtered_commands = filter_match_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
     # преобразауем ключи с порядкоового номера в имена срикптов
     named_dict=key_id_to_name(filtered_commands)
     # выводим список ключей , который будут записаны в файлы
