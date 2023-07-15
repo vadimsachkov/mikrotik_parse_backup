@@ -2,7 +2,8 @@ import re
 import os
 from tkinter import filedialog as fd
 import collections
-
+import tkinter as tk
+from tkinter import simpledialog
 
 # парсирует файл экспортированный  из микротик командой export terse file=$fn;
 # и записывает в словарь команды по порядку. (ключ=порядковый номер, значение=сама многострочная команда)
@@ -63,7 +64,7 @@ def write_dict_to_files(data_dict, filename, size):
     except IOError as e:
         print(f"Ошибка при открытии или записи файла: {e}")
 # записывет каждый скрипт в отдельный именованный файл
-def write_dict_to_files_byfunction(data_dict, file_path):
+def write_dict_to_files_byfunction(data_dict, file_path,fileprefix):
     try:
         file_number = 1
 
@@ -75,7 +76,7 @@ def write_dict_to_files_byfunction(data_dict, file_path):
         # Записываем значения словаря в файл
         for key, value in data_dict.items():
             line = f"{value}"
-            current_file = f"{directory}/m_{file_number}__{key}{file_ext}"
+            current_file = f"{directory}/{fileprefix}_{file_number}__{key}{file_ext}"
             file = open(current_file, "w")
             file.write(line)
             file.close()
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     # фильтруем команды в словаре и оставляем только добавление cкриптов
     filtered_commands = filter_dict_keys(parsed_commands, [r"^/system script add"],True)
     # временно фильттрую функции GlobalFunction . так как они одинаковые
-    #filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
+    filtered_commands = filter_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
     # преобразауем ключи с порядкоового номера в имена срикптов
     named_dict=key_id_to_name(filtered_commands)
     # выводим список ключей , который будут записаны в файлы
@@ -131,5 +132,12 @@ if __name__ == '__main__':
     # записывапем словарь в файлы, ограничивая размер (третий параметр)
     write_dict_to_files(named_dict, backup_filename, 0)
     # записывет каждый скрипт в отдельный именованный файл
-    #write_dict_to_files_byfunction(named_dict, backup_filename)
+    # Создание главного окна
+    root = tk.Tk()
+    # Скрытие главного окна
+    root.withdraw()
+    # Запрос ввода строки у пользователя в диалоговом окне
+    user_input_fileprefix = simpledialog.askstring("Введите префикс файлов:", "Введите префикс файлов для скриптов, например m61")
+    #user_input_fileprefix = input("Введите префикс файлов для скриптов, например m61: ")
+    write_dict_to_files_byfunction(named_dict, backup_filename,user_input_fileprefix)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
