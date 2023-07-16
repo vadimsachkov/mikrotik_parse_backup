@@ -125,19 +125,32 @@ def key_id_to_name(dict_data):
         sorted_dict[key]=value
     return sorted_dict
 
+# удаляет из словаря ключи, которые соот-ет хоть одному регул. шаблону из списка keylist
+def remove_keys_matching_patterns(dictionary, keylist):
+    pattern = '|'.join(keylist)
+    keys_to_remove = [key for key in dictionary.keys() if re.search(pattern, key)]
+    _ = [dictionary.pop(key) for key in keys_to_remove]
+
+# оставляем в словаре все ключи,  которые соот-ет хоть одному регул. шаблону из списка keylist
+def filter_dict_by_regex(dictionary, keylist):
+    return {key: value for key, value in dictionary.items() if any(re.search(regex, key) for regex in keylist)}
 
 if __name__ == '__main__':
     backup_filename=fd.askopenfilename(title="Выберите backup, экспортируемый из микротик")
     if backup_filename=="": exit(0)
     #backup_filename = "C:\\Users\\user\\Desktop\\Новая папка (4)\\2.rsc"
     # отпарсировать экспортирвоанные команды микротик в словарь (ключ=порядковый номер, значение=сама многострочная команда)
-    parsed_commands = backup_to_dict(backup_filename)
+    commands = backup_to_dict(backup_filename)
     # фильтруем команды в словаре и оставляем только добавление cкриптов
-    filtered_commands = filter_match_dict_keys(parsed_commands, [r"^/system script add"], True)
+    commands = filter_match_dict_keys(commands, [r"^/system script add"], True)
     # временно фильттрую функции GlobalFunction . так как они одинаковые
-    filtered_commands = filter_match_dict_keys(filtered_commands, [r"^[^\n]+? name=Global"], False)
+    # commands = filter_match_dict_keys(commands, [r"^[^\n]+? name=Global"], False)
     # преобразауем ключи с порядкоового номера в имена срикптов
-    named_dict=key_id_to_name(filtered_commands)
+    named_dict=key_id_to_name(commands)
+    # удаляем(или оставляем ) скрипты, которые в списке
+    listscripts=["GlobalFunctions.*","EnableModem"]
+    #named_dict = {key: named_dict[key] for key in named_dict if key not in listscripts}
+    remove_keys_matching_patterns(named_dict, listscripts)
     # выводим список ключей , который будут записаны в файлы
     for name, command_body in named_dict.items():
         print(f'Command: {name}')
