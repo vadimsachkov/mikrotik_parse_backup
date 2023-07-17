@@ -31,6 +31,16 @@ def backup_to_dict(filepath):
 
     return result
 
+def add_commands_remove_scripts(data_dict, filename):
+        # Получаем базовое имя файла и расширение
+        file_name, file_ext = os.path.splitext(filename)
+        # Создаем новое имя файла с добавленной переменной var
+        current_file = f"{file_name}__remove{file_ext}"
+        with open(current_file, "w") as file:
+            for key in data_dict.keys():
+                line = f"/system script remove {key}\n"
+                file.write(line)
+
 # записывает словарь в файлы с именем  filename (добавляя к имени файла __ и порядковый номер)
 def write_dict_to_files(data_dict, filename, size):
     try:
@@ -157,6 +167,7 @@ if __name__ == '__main__':
         #print(f'Body:\n{command_body}')
     # записывапем словарь в файлы, ограничивая размер (третий параметр)
     write_dict_to_files(named_dict, backup_filename, 0)
+    add_commands_remove_scripts(named_dict, backup_filename)
     # записывет каждый скрипт в отдельный именованный файл
     # Создание главного окна
     root = tk.Tk()
