@@ -31,6 +31,7 @@ def backup_to_dict(filepath):
 
     return result
 
+# создает файл , куда добавляет команды удаления скриптов, которые будут позже добавлены
 def add_commands_remove_scripts(data_dict, filename):
         # Получаем базовое имя файла и расширение
         file_name, file_ext = os.path.splitext(filename)
@@ -97,6 +98,7 @@ def write_dict_to_files_byfunction(data_dict, file_path,fileprefix):
 # фильтрует словарь команд (ключ это порядковый номер, а занчение тело команды)
 # если isneed == True, то в словаре ОСТАЮТСЯ только команды, которые сооветствуют хоть одному шаблону из списка list_reg
 # если isneed == False, то в словаре УДАЛЯЮТСЯ  команды, которые сооветствуют хоть одному шаблону из списка list_reg
+# пример:   commands = filter_match_dict_keys(commands, [r"^[^\n]+? name=Global"], False)
 def filter_match_dict_keys(dict_data, list_reg, isneed):
 
     filtered_dict = {}
@@ -148,25 +150,21 @@ def filter_dict_by_regex(dictionary, keylist):
 if __name__ == '__main__':
     backup_filename=fd.askopenfilename(title="Выберите backup, экспортируемый из микротик")
     if backup_filename=="": exit(0)
-    #backup_filename = "C:\\Users\\user\\Desktop\\Новая папка (4)\\2.rsc"
     # отпарсировать экспортирвоанные команды микротик в словарь (ключ=порядковый номер, значение=сама многострочная команда)
     commands = backup_to_dict(backup_filename)
     # фильтруем команды в словаре и оставляем только добавление cкриптов
     commands = filter_match_dict_keys(commands, [r"^/system script add"], True)
-    # временно фильттрую функции GlobalFunction . так как они одинаковые
-    # commands = filter_match_dict_keys(commands, [r"^[^\n]+? name=Global"], False)
-    # преобразауем ключи с порядкоового номера в имена срикптов
+    # преобразауем ключи словаря с порядкового номера в имена скриптов
     named_dict=key_id_to_name(commands)
     # удаляем(или оставляем ) скрипты, которые в списке
-    listscripts=["GlobalFunctions.*","EnableModem"]
+    listscripts=["EnableModem", "~.+"]
     #named_dict = {key: named_dict[key] for key in named_dict if key not in listscripts}
     remove_keys_matching_patterns(named_dict, listscripts)
     # выводим список ключей , который будут записаны в файлы
     for name, command_body in named_dict.items():
         print(f'Command: {name}')
-        #print(f'Body:\n{command_body}')
     # записывапем словарь в файлы, ограничивая размер (третий параметр)
-    write_dict_to_files(named_dict, backup_filename, 0)
+    write_dict_to_files(named_dict, backup_filename, 50000)
     add_commands_remove_scripts(named_dict, backup_filename)
     # записывет каждый скрипт в отдельный именованный файл
     # Создание главного окна
@@ -176,5 +174,5 @@ if __name__ == '__main__':
     # Запрос ввода строки у пользователя в диалоговом окне
     user_input_fileprefix = simpledialog.askstring("Введите префикс файлов:", "Введите префикс файлов для скриптов, например m61")
     #user_input_fileprefix = input("Введите префикс файлов для скриптов, например m61: ")
-    write_dict_to_files_byfunction(named_dict, backup_filename,user_input_fileprefix)
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    #write_dict_to_files_byfunction(named_dict, backup_filename,user_input_fileprefix)
+
